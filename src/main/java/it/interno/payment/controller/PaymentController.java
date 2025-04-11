@@ -2,6 +2,7 @@ package it.interno.payment.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import it.interno.common.lib.model.OrderDto;
+import it.interno.common.lib.util.Utility;
 import it.interno.payment.dto.ResponseDto;
 import it.interno.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,19 @@ public class PaymentController {
 
         ResponseDto<OrderDto> response = new ResponseDto<>(
                 HttpStatus.OK.value(), orderDto, null, null
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Callback per fallimento")
+    @PostMapping(path = "/fallimento-ordine")
+    public ResponseEntity<ResponseDto<String>> fallimentoOrdine(@RequestBody OrderDto orderDto) {
+
+        paymentService.fallimentoOrdine(orderDto);
+
+        ResponseDto<String> response = new ResponseDto<>(
+                HttpStatus.OK.value(), "CANCELLAZIONE EFFETTUATA", null, null
         );
 
         return ResponseEntity.ok(response);

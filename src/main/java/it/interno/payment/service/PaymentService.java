@@ -6,4 +6,6 @@ public interface PaymentService {
 
     OrderDto processaPagamentoOrdine(OrderDto orderDto);
 
+    void fallimentoOrdine(OrderDto orderDto) ;
+
 }

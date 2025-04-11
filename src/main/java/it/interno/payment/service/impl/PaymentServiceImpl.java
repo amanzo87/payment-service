@@ -1,14 +1,23 @@
 package it.interno.payment.service.impl;
 
 import it.interno.common.lib.model.OrderDto;
+import it.interno.common.lib.model.PaymentDto;
+import it.interno.common.lib.model.ProductDto;
+import it.interno.common.lib.model.ShippingDto;
 import it.interno.common.lib.util.Utility;
 import it.interno.payment.entity.Payment;
+import it.interno.payment.entity.key.PaymentKey;
+import it.interno.payment.exception.PaymentFallbackException;
+import it.interno.payment.mapper.PaymentMapper;
 import it.interno.payment.repository.PaymentRepository;
 import it.interno.payment.service.PaymentService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -16,6 +25,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private PaymentMapper paymentMapper;
 
     @Transactional
     @Override
@@ -39,6 +51,7 @@ public class PaymentServiceImpl implements PaymentService {
 
                 paymentRepository.save(payment);
 
+                orderDto.setPaymentDto( paymentMapper.toDto(payment) );
                 orderDto.setPagamentoEffettuato(Boolean.TRUE);
                 orderDto.setIdStato(3);
             }else{
@@ -47,6 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new PaymentFallbackException(e.getMessage());
         }
 
         return orderDto;
@@ -55,6 +69,21 @@ public class PaymentServiceImpl implements PaymentService {
     private boolean simulaPagamento() {
         Random random = new Random();
         return random.nextBoolean();
+    }
+
+    @Transactional
+    @Override
+    public void fallimentoOrdine(OrderDto orderDto) {
+
+        PaymentDto paymentDto = orderDto.getPaymentDto();
+
+        PaymentKey paymentKey = new PaymentKey();
+
+        paymentKey.setIdPagamento(paymentDto.getIdPagamento());
+        paymentKey.setTsInserimento(Utility.convertStringToTimestamp(paymentDto.getTsInserimento()));
+
+        paymentRepository.deleteById(paymentKey);
+
     }
 
 }
