@@ -33,7 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public OrderDto processaPagamentoOrdine(OrderDto orderDto) {
 
-        try{
+//        try{
 
             orderDto.setPagamentoEffettuato( simulaPagamento() ); // 0 = Pagamento OK, 1 = Pagamento KO
 
@@ -55,13 +55,15 @@ public class PaymentServiceImpl implements PaymentService {
                 orderDto.setPagamentoEffettuato(Boolean.TRUE);
                 orderDto.setIdStato(3);
             }else{
-                orderDto.setIdStato(5);
+                throw new PaymentFallbackException("PAGAMENTO NON ANDATO A BUON FINE");
+                //orderDto.setIdStato(5);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new PaymentFallbackException(e.getMessage());
-        }
+//        } catch (Exception e) {
+//            throw e;
+//            //e.printStackTrace();
+//            //throw new PaymentFallbackException(e.getMessage());
+//        }
 
         return orderDto;
     }
